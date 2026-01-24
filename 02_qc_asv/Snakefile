@@ -1,0 +1,14 @@
+# 最小 DADA2 流程 → ASV 表
+configfile: "config.yaml"
+samples = [f"ERRID_{i:05d}" for i in range(1, 501)]
+rule all:
+    input: expand("03_table/{s}_asv.tsv", s=samples)
+rule cutadapt:
+    input: "01_fetch/{sample}.fastq.gz"
+    output: "02_trim/{sample}_trim.fq.gz"
+    shell: "cutadapt -a AGATCGGAAGAGC -m 100 -o {output} {input} &> {log}"
+rule dada2_single:
+    input: "02_trim/{sample}_trim.fq.gz"
+    output: "03_table/{sample}_asv.tsv"
+    log: "03_table/{sample}.log"
+    script: "run_dada2.R"
